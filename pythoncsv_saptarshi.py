@@ -3,12 +3,13 @@ import csv
 
 def printCSV(myList = []):
 	with open('print.csv', 'w') as csvfile:
-		writer = csv.writer(csvfile, delimiter=' ', quotechar=',', quoting=csv.QUOTE_MINIMAL)
-		writer.writerow(myList)
+		writer = csv.writer(csvfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+		for item in myList:
+			writer.writerow(item)
 
 def printToScreen():
 	with open('print.csv', 'r') as csvfile:
-		reader = csv.reader(csvfile, delimiter=' ', quotechar=',')
+		reader = csv.reader(csvfile, delimiter=',', quotechar='"')
 		for row in reader:
 			print (', '.join(row))
 
