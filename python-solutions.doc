@@ -1,0 +1,185 @@
+﻿Solutions to problems in http://www.linuxtopia.org/online_books/programming_books/python_programming/python_ch20s07.html
+
+1. All Dice Combinations. Write a list comprehension that uses nested for-clauses to create a single list with all 36 different dice combinations from (1,1) to (6,6).
+
+dice = [(x,y) for x in range(1,7) for y in range(1,7)]
+
+2. Temperature Table. Write a list comprehension that creates a list of tuples. Each tuple has two values, a temperature in Farenheit and a temperature in Celsius.
+
+Create one list for Farenheit values from 0 to 100 in steps of 5 and the matching Celsius values.
+
+Create another list for Celsius values from -10 to 50 in steps of 2 and the matching Farenheit values.
+
+celsius = range(-10, 51, 2) 
+fahrenheit = range(101, 5)
+
+list_1 = [(x, 1.8*x+32) for x in celsius]
+list_2 = [(5*(x-32)/float(9), x) for x in fahrenheit]
+
+3. Define max() and min(). Use reduce to create versions of the built-ins max and min.
+
+You may find this difficult to do this with a simple lambda form. However, consider the following. We can pick a value from a tuple like this: (a,b)[0] == a, and (a,b)[1] == b. What are the values of (a,b)[a<b] and (a,b)[a>b]?
+
+This is actually a very beautiful way of getting maximum and minimum. Let's try to illustrate it using a tuple.
+
+x = (a,b) where a < b
+
+a<b is true == 1 ; x[a<b] = b which is max of the two
+a>b is false == 0 ; x[a>b] = a which is min of the two
+
+We can use this property of tuple along with reduce to create max and min functions
+
+a = [1,4,3,5,2]
+max = reduce(lambda x,y : (x,y)[x<y], a)
+min = reduce(lambda x,y : (x,y)[x>y], a)
+
+4. Compute the Average or Mean. A number of standard descriptive statistics can be built with reduce. These include mean and standard deviation. The basic formulae are given in Chapter 13, Tuples .
+
+Mean is a simple “add-reduction” of the values in a sequence divided by the length.
+
+a = [1,4,3,5,2,6]
+mean = reduce(lambda x,y : x+y, a)/float(len(a))
+
+5. Compute the Variance and Standard Deviation. A number of standard descriptive statistics can be built with reduce. These include mean and standard deviation. The basic formulae are given in Chapter 13, Tuples .
+
+The standard deviation has a number of alternative definitions. One approach is to sum the values and square this number, as well as sum the squares of each number. Summing squares can be done as a map to compute squares and then use a sum function based on reduce. Or summing squares can be done with a special reduce that both squares and sums.
+
+Also the standard deviation can be defined as the square root of the variance, which is computed as:
+
+Procedure 20.1. Variance of a sequence a
+
+Mean. m ← mean(a)
+
+Total Variance. s ← sum of (a[i] − m )2 for all i
+
+Average Variance. divide s by n−1
+
+import math
+
+a = [1,4,3,5,2,6]
+mean = reduce(lambda x,y : x+y, a)/float(len(a))
+sq_list = map(lambda x : (x-mean)**2, a)
+avg_var = reduce(lambda x,y : x+y, sq_list)/float(len(sq_list)-1)
+stdev = math.sqrt(avg_var)
+
+6. Compute the Mode. The mode function finds the most common value in a data set. This can be done by computing the frequency with which each unique value occurs and sorting that list to find the most common value. The frequency distribution is easiest done using a mapping, something we'll cover in the next chapter. This can be simplified also using the advanced list sorting in the next section of this chapter.
+
+Procedure 20.2. Mode of a sequence, a
+
+Initialization
+
+fqList ← empty list
+
+For each value, v in a
+
+If v is element 0 of one of the tuples of fqList, then
+
+Get the frequency, f, element 1 of the tuple.
+
+Remove the tuple (v,f) from fqList.
+
+Create a new tuple (v,f+1).
+
+Add the new tuple to the fqList.
+
+If v is not element 0 of one of the tuples of fqList, then
+
+Create a new tuple (v,1).
+
+Add the new tuple to the fqList.
+
+Save tuple 0 of the fqList as the largest tuple, maxFq.
+
+For each frequency, t in fqList
+
+If t's frequency is larger than the frequency of maxFq, then
+
+maxFq ← t.
+
+Return maxFq as the modal value and the frequency with which it occurs.
+
+a = [1,2,2,3,3,3]
+b = []
+for item in a:
+	if item in [x[0] for x in b]:
+		f = x[1]
+		b.remove(x)
+		f = f+1
+		b.append((item, f))
+	else:
+		b.append((item, 1))
+
+max_f = 0
+for item in [x[1] for x in b]:
+	if item > max_f:
+		max_f = item
+
+7. Compute the Median. The median function arranges the values in sorted order. It locates either the mid-most value (if there are an odd number) or it averages two adjacent values (if there are an even number).
+
+If len(data) % 2 == 1, there is an odd number of values, and (len(data)+1)/2 is the midmost value. Otherwise there is an even number of values, and the len(data)/2 and len(data)/2-1 are the two mid-most values which must be averaged.
+
+a = [1,2,3,4,5]
+b = len(a)
+if (b%2 == 0):
+	med = (a[b/2] + a[b/2 - 1])/float(2)
+else:
+	med = a[(b-1)/2]
+
+P.S. You can use a library called statistics in Python3 which helps to calculate mean, median, mode, variance and standard deviation.
+
+8. Unique Values In A Sequence. In Accumulating Unique Values, we looked at accumulating the unique values in a sequence. Sorting the sequence leads to a purely superficial simplification. Sorting is a relatively expensive operation, but for short sequences, the cost is not much higher than the version already presented.
+
+Given an input sequence, seq, we can easily sort this sequence. This will put all equal-valued elements together. The comparison for unique values is now done between adjacent values, instead of a lookup in the resulting sequence.
+
+Procedure 20.3. Unique Values of a Sequence, seq , using sort
+
+Initalize
+
+set result ← an empty sequence.
+
+Sort the input sequence, seq .
+
+Loop. For each value, v, in seq .
+
+Already in result? Is v the last element in result? If so, ignore it. If not, append v to the sequence result.
+
+Result. Return array result, which has unique values from seq .
+
+a = [1,2,2,3,3,3]
+b = []
+for item in a:
+	if item in b:
+		continue
+	else:
+		b.append(item)
+
+P.S. If you try doing it by list comprehesion method, you'll get [1,2,3,4,5]. This is because list comprehension doesn't happen step by step.
+
+9. Portfolio Reporting. In Blocks of Stock, we presented a stock portfolio as a sequence of tuples. Plus, we wrote two simple functions to evaluate purchase price and total gain or loss for this portfolio.
+
+Develop a function (or a lambda form) to sort this porfolio into ascending order by current value (current price * number of shares). This function (or lambda) will require comparing the products of two fields instead of simply comparing two fields.
+
+Use lambda function in the sort key.
+
+a = [(1,8),(2,5),(3,3)]
+b = sorted(a, key = lambda x:x[0]*x[1])
+
+10. Matrix Formatting. Given a 6×6 matrix of dice rolls, produce a nicely formatted result. Each cell should be printed with a format like "| %2s" so that vertical lines separate the columns. Each row should end with an '|'. The top and bottom should have rows of "----"'s printed to make a complete table.
+
+Not able to solve this problem.
+
+11. Three Dimensions. If the rolls of two dice can be expressed in a two-dimensional table, then the rolls of three dice can be expressed in a three-dimensional table. Develop a three dimensional table, 6 x 6 x 6, that has all 216 different rolls of three dice.
+
+Write a loop that extracts the different values and summarizes them in a frequency table. The range of values will be from 3 to 18.
+
+For the three dimensional table, you can use tuple of 3.
+
+a = [(x,y,z) for x in range(1,7) for y in range(1,7) for z in range(1,7)]
+
+For this question, I'm going to use a library called collections.
+
+import collections
+
+a = [x+y+z for x in range(1,7) for y in range(1,7) for z in range(1,7)]
+b = collections.Counter(a).most_common()
+b = sorted(b, key = lambda x:x[0])
